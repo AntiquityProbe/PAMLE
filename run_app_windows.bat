@@ -5,6 +5,7 @@ REM === CONFIGURATION ===
 set "ENVNAME=open3d-env"
 set "MINICONDA_URL=https://repo.anaconda.com/miniconda/Miniconda3-latest-Windows-x86_64.exe"
 set "MINICONDA_INSTALLER=%TEMP%\Miniconda3-latest-Windows-x86_64.exe"
+set "FLASK_PORT=5001"
 REM =====================
 
 REM Try to find conda in PATH
@@ -93,7 +94,44 @@ if errorlevel 1 (
 REM Change to script directory (outside any parenthesis for safety)
 cd /d "%~dp0"
 
-REM Start the Flask app (ensure app.py uses port 5001)
+REM --- USER INSTRUCTIONS BEFORE STARTING FLASK ---
+echo.
+echo ============================================
+echo The Flask server is about to start.
+echo When you see "Running on http://127.0.0.1:%FLASK_PORT%/", 
+echo open your web browser and go to:
+echo     http://127.0.0.1:%FLASK_PORT%
+echo (Press Ctrl+C in this window to stop the server)
+echo ============================================
+echo.
+
+REM --- POPUP MESSAGE BOX (Windows only, Yes/No) ---
+echo Set objArgs = WScript.Arguments > "%TEMP%\popup.vbs"
+echo message = objArgs(0) >> "%TEMP%\popup.vbs"
+echo title = objArgs(1) >> "%TEMP%\popup.vbs"
+echo result = MsgBox(message, 36, title) >> "%TEMP%\popup.vbs"
+echo WScript.Quit result >> "%TEMP%\popup.vbs"
+
+cscript //nologo "%TEMP%\popup.vbs" "The Flask server is about to start. Open PAMLE in default browser?" "Flask App Instructions"
+set "POPUP_RESULT=%ERRORLEVEL%"
+del "%TEMP%\popup.vbs"
+
+REM Check if user clicked Yes (6) or No (7)
+if "%POPUP_RESULT%"=="6" (
+    start http://127.0.0.1:5001
+) else (
+    echo User chose not to open the browser. Aborting operation.
+    exit /b 0
+)
+
+REM Only runs if user clicked Yes:
+REM (Start Flask app and other operations here)
+
+
+REM --- OPEN DEFAULT BROWSER TO THE FLASK URL ---
+start http://127.0.0.1:%FLASK_PORT%
+
+REM --- START FLASK APP ---
 echo Starting Flask app...
 conda run -n %ENVNAME% python app.py
 if errorlevel 1 (
@@ -102,8 +140,9 @@ if errorlevel 1 (
     exit /b 1
 )
 
-REM Open browser
-start http://127.0.0.1:5001
+REM (Optional: open browser automatically after a delay)
+REM timeout /t 3
+REM start http://127.0.0.1:%FLASK_PORT%
 
 pause
 endlocal
