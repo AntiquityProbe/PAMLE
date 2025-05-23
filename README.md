@@ -25,7 +25,7 @@ This guide provides step-by-step instructions to run the Mesh Viewer app on a Wi
      run_app_windows.bat
      ```
    - This script will:
-     - Check if Conda is installed and available in your PATH.
+     - Check if Conda is installed and available in your system.
      - If Conda is not found, it will prompt to download and install Miniconda silently.
      - After installation, it will initialize Conda in the current session.
      - Check if the Conda environment `open3d-env` exists; if not, it will create it and install required packages.
